@@ -36,11 +36,11 @@ Ensure you have **Node.js** (v20 or higher) and `npm` installed on your local ma
 ### Installation
 
 1. Clone the repository:
-   ```bash
+```bash
    git clone [https://github.com/yuyudaodevlab/NeoPop-GradationLab.git](https://github.com/yuyudaodevlab/NeoPop-GradationLab.git)
    cd NeoPop-GradationLab
-
 ```
+
 
 2. Install the project dependencies:
 ```bash
