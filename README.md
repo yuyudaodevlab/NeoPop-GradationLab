@@ -85,17 +85,3 @@ We welcome contributions from the open-source community! If you'd like to contri
 
 *Note for Contributors: Please review `AGENTS.md` and `CLAUDE.md` in the repository root for repository-specific AI-assisted development rules and Next.js versioning notices before submitting large structural changes.*
 
-```
-
----
-
-### Key Takeaways
-* **Clear Purpose**: The README immediately establishes the project's identity, live URL, and core functionality right at the top.
-* **Structured Accessibility**: Adhering to the *What, Why, How, Where, Who* model ensures potential contributors and users can parse the document rapidly.
-* **Technical Accuracy**: The instructions strictly align with the `package.json` scripts (`dev`, `build`, `start`, `lint`) and correctly recognize the Next.js 16 / React 19 stack.
-
-### Architecture Analysis (Pros & Cons)
-* **Pros**: Utilizing Next.js App Router alongside Tailwind CSS v4 and Framer Motion offers excellent developer ergonomics, high performance out-of-the-box, and a highly polished, interactive UI. The mathematical color generation (`@/lib/colors.ts`) abstracts complex logic cleanly away from the UI components.
-* **Cons**: Depending heavily on client-side state (`"use client"`) for the primary page (`page.tsx`) sacrifices some Server-Side Rendering (SSR) SEO benefits. Additionally, Framer Motion can add a non-trivial amount of JavaScript bundle size to the initial page load.
-
-```
