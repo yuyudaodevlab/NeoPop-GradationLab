@@ -21,7 +21,13 @@ export default function Blob({ gradient, index }: BlobProps) {
   const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
-    setBorderRadius(generateBlobRadius());
+    // We want the shape to morph when gradient changes,
+    // but the linter warns about cascading renders.
+    // Using setTimeout schedules it after the current render cycle.
+    const timer = setTimeout(() => {
+      setBorderRadius(generateBlobRadius());
+    }, 0);
+    return () => clearTimeout(timer);
   }, [gradient]);
 
   const cssGradient = `linear-gradient(135deg, ${gradient.colors[0]} 0%, ${gradient.colors[1]} 100%)`;
