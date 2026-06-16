@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FDF5FE;
+  --foreground: #2D283E;
+  --primary: #FF477E;
+  --secondary: #00E5FF;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --font-sans: var(--font-kiwi-maru), sans-serif;
+  --font-display: var(--font-zen-maru-gothic), sans-serif;
+  --font-mono: var(--font-space-mono), monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+@keyframes blob-bg {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-blob-bg {
+  background-size: 200% 200%;
+  animation: blob-bg 5s ease infinite;
+}
