@@ -63,6 +63,7 @@ export default function Blob({ gradient, index, defaultFormat, onCopy }: BlobPro
       <div className="relative w-48 h-48 sm:w-56 sm:h-56 mb-6">
         {/* The Liquid Blob */}
         <motion.button
+          type="button"
           aria-label={`グラデーション ${gradient.name} をコピーする`}
           onClick={() => handleCopy()}
           className="absolute inset-0 cursor-pointer shadow-lg hover:shadow-xl transition-shadow animate-blob-bg focus-visible:ring-4 focus-visible:ring-[var(--primary)] focus-visible:outline-none"
@@ -98,8 +99,10 @@ export default function Blob({ gradient, index, defaultFormat, onCopy }: BlobPro
         {/* Format Selector Menu */}
         <div className="absolute -bottom-3 right-0 z-20">
           <button
+            type="button"
             aria-label="コピー形式を選択する"
             aria-expanded={showMenu}
+            aria-haspopup="true"
             onClick={(e) => {
               e.stopPropagation();
               setShowMenu(!showMenu);
