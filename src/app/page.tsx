@@ -1,14 +1,56 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Palette, Wand2 } from "lucide-react";
-import { generatePalettes, getRandomHex, CategoryData } from "@/lib/colors";
+import { Palette, Wand2, ClipboardCheck, History, Check } from "lucide-react";
+import { generatePalettes, getRandomHex, CategoryData, CopyFormat, GradientData, formatGradient } from "@/lib/colors";
 import Blob from "@/components/Blob";
 import { motion } from "framer-motion";
 
 export default function Home() {
   const [hexColor, setHexColor] = useState<string>("#FF477E");
   const [palettes, setPalettes] = useState<CategoryData[] | null>(null);
+  const [defaultFormat, setDefaultFormat] = useState<CopyFormat>('css-full');
+  const [copyHistory, setCopyHistory] = useState<GradientData[]>([]);
+  const [lastHistoryCopiedId, setLastHistoryCopiedId] = useState<string | null>(null);
+
+  // Load persistence (on mount)
+  useEffect(() => {
+    const savedFormat = localStorage.getItem('defaultFormat') as CopyFormat;
+    if (savedFormat) {
+      // Use setTimeout to avoid synchronous setState during render cycle/effect init
+      const timer = setTimeout(() => setDefaultFormat(savedFormat), 0);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('copyHistory');
+    if (savedHistory) {
+      try {
+        const parsed = JSON.parse(savedHistory);
+        const timer = setTimeout(() => setCopyHistory(parsed), 0);
+        return () => clearTimeout(timer);
+      } catch (e) {
+        console.error("Failed to parse history", e);
+      }
+    }
+  }, []);
+
+  // Save persistence
+  useEffect(() => {
+    localStorage.setItem('defaultFormat', defaultFormat);
+  }, [defaultFormat]);
+
+  useEffect(() => {
+    localStorage.setItem('copyHistory', JSON.stringify(copyHistory));
+  }, [copyHistory]);
+
+  const handleCopySuccess = useCallback((gradient: GradientData) => {
+    setCopyHistory(prev => {
+      const filtered = prev.filter(item => item.id !== gradient.id);
+      return [gradient, ...filtered].slice(0, 5);
+    });
+  }, []);
 
   const handleGenerate = useCallback((color: string) => {
     setHexColor(color);
@@ -79,6 +121,29 @@ export default function Home() {
         </button>
       </section>
 
+      {/* Clipboard Settings */}
+      <section className="mb-12 flex flex-wrap items-center justify-center gap-4 bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-gray-100 shadow-sm">
+        <div className="flex items-center gap-2 text-sm font-bold text-[var(--foreground)]/70">
+          <ClipboardCheck className="w-4 h-4 text-[var(--primary)]" />
+          <span>コピー形式の既定値:</span>
+        </div>
+        <div className="flex gap-2">
+          {(['css-full', 'css-value', 'hex', 'json', 'tailwind'] as CopyFormat[]).map((f) => (
+            <button
+              key={f}
+              onClick={() => setDefaultFormat(f)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                defaultFormat === f
+                  ? "bg-[var(--primary)] text-white shadow-md scale-105"
+                  : "bg-white text-[var(--foreground)]/60 hover:bg-white/80 border border-gray-100"
+              }`}
+            >
+              {f.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </section>
+
       {palettes ? (
         <motion.div
           className="w-full space-y-16"
@@ -105,7 +170,13 @@ export default function Home() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-10 justify-items-center">
                 {category.gradients.map((grad, index) => (
-                  <Blob key={grad.id} gradient={grad} index={index} />
+                  <Blob
+                    key={grad.id}
+                    gradient={grad}
+                    index={index}
+                    defaultFormat={defaultFormat}
+                    onCopy={handleCopySuccess}
+                  />
                 ))}
               </div>
             </motion.section>
@@ -115,6 +186,42 @@ export default function Home() {
         <div className="flex-1 flex items-center justify-center opacity-50">
           <p className="text-xl animate-pulse">魔法の準備中...</p>
         </div>
+      )}
+
+      {/* Recently Copied History */}
+      {copyHistory.length > 0 && (
+        <section className="mt-20 w-full max-w-2xl">
+          <div className="flex items-center gap-2 mb-6 text-[var(--foreground)]/60">
+            <History className="w-5 h-5" />
+            <h2 className="font-bold tracking-wider">最近コピーしたグラデーション</h2>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {copyHistory.map((grad) => (
+              <motion.button
+                key={`${grad.id}-${grad.colors.join('-')}`}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                onClick={async () => {
+                  const text = formatGradient(grad, defaultFormat);
+                  await navigator.clipboard.writeText(text);
+                  setLastHistoryCopiedId(grad.id + grad.colors.join(''));
+                  setTimeout(() => setLastHistoryCopiedId(null), 2000);
+                  handleCopySuccess(grad);
+                }}
+                className="group flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all active:scale-95"
+              >
+                <div
+                  className="w-4 h-4 rounded-full border border-black/5"
+                  style={{ background: `linear-gradient(135deg, ${grad.colors[0]}, ${grad.colors[1]})` }}
+                />
+                <span className="text-sm font-bold">{grad.name}</span>
+                {lastHistoryCopiedId === grad.id + grad.colors.join('') && (
+                  <Check className="w-4 h-4 text-green-500 animate-in zoom-in" />
+                )}
+              </motion.button>
+            ))}
+          </div>
+        </section>
       )}
     </main>
   );
