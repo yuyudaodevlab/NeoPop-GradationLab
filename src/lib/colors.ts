@@ -64,17 +64,23 @@ export type CategoryData = {
 const adjectives = ['ぷにぷに', 'エレクトリック', 'ねむたい', 'きらきら', 'ふわふわ', 'とろける', 'サイバー', 'まぼろしの', 'ピュアな'];
 const nouns = ['メロン', 'ミント', 'ピーチ', 'ソーダ', 'レモン', 'ベリー', 'グレープ', 'ミルク', 'キャンディ'];
 
-function generateCuteName(h: number): string {
+function generateCuteName(h: number, s: number, l: number): string {
   const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
   let noun = nouns[0];
-  if (h >= 0 && h < 30) noun = 'ピーチ';
-  else if (h >= 30 && h < 60) noun = 'レモン';
-  else if (h >= 60 && h < 150) noun = 'メロン';
-  else if (h >= 150 && h < 200) noun = 'ミント';
-  else if (h >= 200 && h < 250) noun = 'ソーダ';
-  else if (h >= 250 && h < 300) noun = 'グレープ';
-  else if (h >= 300 && h < 340) noun = 'ベリー';
-  else noun = 'キャンディ';
+
+  if (s < 15 && l > 80) {
+    const paleNouns = ['ミルク', 'スノー', 'ホイップ', 'マシュマロ'];
+    noun = paleNouns[Math.floor(Math.random() * paleNouns.length)];
+  } else {
+    if (h >= 0 && h < 30) noun = 'ピーチ';
+    else if (h >= 30 && h < 60) noun = 'レモン';
+    else if (h >= 60 && h < 150) noun = 'メロン';
+    else if (h >= 150 && h < 200) noun = 'ミント';
+    else if (h >= 200 && h < 250) noun = 'ソーダ';
+    else if (h >= 250 && h < 300) noun = 'グレープ';
+    else if (h >= 300 && h < 340) noun = 'ベリー';
+    else noun = 'キャンディ';
+  }
 
   return `${adj}・${noun}`;
 }
@@ -82,18 +88,18 @@ function generateCuteName(h: number): string {
 export function generatePalettes(baseHex: string): CategoryData[] {
   const baseHSL = hexToHSL(baseHex);
 
-  // Vivid (鮮やかポップ): Keep saturation high (>70%). Shift Hue slightly.
+  // Vivid (鮮やかポップ): Keep saturation high (>60%). Shift Hue slightly.
   const vividGradients: GradientData[] = Array.from({ length: 3 }).map((_, i) => {
     const h1 = (baseHSL.h + i * 20) % 360;
     const h2 = (baseHSL.h + 40 + i * 20) % 360;
-    const s = Math.max(80, baseHSL.s);
-    const l1 = Math.max(40, Math.min(60, baseHSL.l));
-    const l2 = Math.max(50, Math.min(70, baseHSL.l + 10));
+    const s = Math.max(60, baseHSL.s);
+    const l1 = Math.max(40, Math.min(85, baseHSL.l - 10));
+    const l2 = Math.max(50, Math.min(95, baseHSL.l));
 
     return {
       id: `vivid-${i}`,
       colors: [hslToHex({ h: h1, s, l: l1 }), hslToHex({ h: h2, s, l: l2 })],
-      name: generateCuteName(h1)
+      name: generateCuteName(h1, s, (l1 + l2) / 2)
     };
   });
 
@@ -101,30 +107,45 @@ export function generatePalettes(baseHex: string): CategoryData[] {
   const vividCoolGradients: GradientData[] = Array.from({ length: 3 }).map((_, i) => {
     const h1 = 160 + (Math.random() * 100); // 160-260
     const h2 = (h1 + 30 + Math.random() * 40) % 360; // Keep within cool ideally, but let it shift
-    const s = 90;
-    const l1 = 45;
-    const l2 = 65;
+    const s = Math.max(70, baseHSL.s);
+    const l1 = Math.max(30, Math.min(80, baseHSL.l - 15));
+    const l2 = Math.max(40, Math.min(90, baseHSL.l - 5));
 
     return {
       id: `cool-${i}`,
       colors: [hslToHex({ h: h1, s, l: l1 }), hslToHex({ h: h2, s, l: l2 })],
-      name: generateCuteName(h1)
+      name: generateCuteName(h1, s, (l1 + l2) / 2)
     };
   });
 
-  // Earth Color (アースカラー): Drop sat to 20-40%. Lightness mid-tones ~50%.
+  // Earth Color (アースカラー): Drop sat to 10-40%. Lightness depends on base.
   const earthGradients: GradientData[] = Array.from({ length: 3 }).map((_, i) => {
     const h1 = (baseHSL.h + i * 15) % 360;
     const h2 = (baseHSL.h + 30 + i * 15) % 360;
-    const s1 = 20 + Math.random() * 20; // 20-40
-    const s2 = 20 + Math.random() * 20;
-    const l1 = 45 + Math.random() * 10; // ~45-55
-    const l2 = 45 + Math.random() * 10;
+    const s1 = Math.max(10, Math.min(baseHSL.s, 30)) + Math.random() * 10;
+    const s2 = Math.max(10, Math.min(baseHSL.s, 40)) + Math.random() * 10;
+    const l1 = Math.max(30, Math.min(baseHSL.l, 75)) + Math.random() * 10;
+    const l2 = Math.max(30, Math.min(baseHSL.l, 85)) + Math.random() * 10;
 
     return {
       id: `earth-${i}`,
       colors: [hslToHex({ h: h1, s: s1, l: l1 }), hslToHex({ h: h2, s: s2, l: l2 })],
-      name: generateCuteName(h1)
+      name: generateCuteName(h1, (s1 + s2) / 2, (l1 + l2) / 2)
+    };
+  });
+
+  // Nuance Pastel (ニュアンス・パステル): High lightness, low saturation.
+  const pastelGradients: GradientData[] = Array.from({ length: 3 }).map((_, i) => {
+    const h1 = (baseHSL.h + i * 30) % 360;
+    const h2 = (h1 + 40) % 360;
+    const s = Math.min(baseHSL.s, 20) + 5;
+    const l1 = Math.max(85, Math.min(95, baseHSL.l - 5));
+    const l2 = Math.max(90, Math.min(98, baseHSL.l));
+
+    return {
+      id: `pastel-${i}`,
+      colors: [hslToHex({ h: h1, s, l: l1 }), hslToHex({ h: h2, s, l: l2 })],
+      name: generateCuteName(h1, s, (l1 + l2) / 2)
     };
   });
 
@@ -132,5 +153,6 @@ export function generatePalettes(baseHex: string): CategoryData[] {
     { categoryName: '鮮やかポップ', gradients: vividGradients },
     { categoryName: '鮮やかクール', gradients: vividCoolGradients },
     { categoryName: 'アースカラー', gradients: earthGradients },
+    { categoryName: 'ニュアンス・パステル', gradients: pastelGradients },
   ];
 }
