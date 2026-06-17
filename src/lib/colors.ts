@@ -134,3 +134,22 @@ export function generatePalettes(baseHex: string): CategoryData[] {
     { categoryName: 'アースカラー', gradients: earthGradients },
   ];
 }
+
+export type CopyFormat = 'css-full' | 'css-value' | 'hex' | 'json' | 'tailwind';
+
+export function formatGradient(gradient: GradientData, format: CopyFormat): string {
+  switch (format) {
+    case 'css-full':
+      return `background: linear-gradient(135deg, ${gradient.colors[0]} 0%, ${gradient.colors[1]} 100%);`;
+    case 'css-value':
+      return `linear-gradient(135deg, ${gradient.colors[0]} 0%, ${gradient.colors[1]} 100%)`;
+    case 'hex':
+      return `${gradient.colors[0]}, ${gradient.colors[1]}`;
+    case 'json':
+      return JSON.stringify({ name: gradient.name, colors: gradient.colors }, null, 2);
+    case 'tailwind':
+      return `from-[${gradient.colors[0]}] to-[${gradient.colors[1]}]`;
+    default:
+      return '';
+  }
+}

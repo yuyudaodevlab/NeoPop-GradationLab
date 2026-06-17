@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { GradientData } from "@/lib/colors";
-import { Copy } from "lucide-react";
+import { GradientData, CopyFormat, formatGradient } from "@/lib/colors";
+import { Copy, ChevronDown } from "lucide-react";
 
 type BlobProps = {
   gradient: GradientData;
   index: number;
+  defaultFormat: CopyFormat;
+  onCopy: (gradient: GradientData) => void;
 };
 
 // Generate random blob border radius
@@ -16,9 +18,10 @@ const generateBlobRadius = () => {
   return `${r()}% ${100 - r()}% ${r()}% ${100 - r()}% / ${r()}% ${r()}% ${100 - r()}% ${100 - r()}%`;
 };
 
-export default function Blob({ gradient, index }: BlobProps) {
+export default function Blob({ gradient, index, defaultFormat, onCopy }: BlobProps) {
   const [borderRadius, setBorderRadius] = useState("50%");
-  const [showToast, setShowToast] = useState(false);
+  const [showToast, setShowToast] = useState<{ show: boolean; format: string }>({ show: false, format: "" });
+  const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
     // We want the shape to morph when gradient changes,
@@ -32,11 +35,14 @@ export default function Blob({ gradient, index }: BlobProps) {
 
   const cssGradient = `linear-gradient(135deg, ${gradient.colors[0]} 0%, ${gradient.colors[1]} 100%)`;
 
-  const handleCopy = async () => {
+  const handleCopy = async (format: CopyFormat = defaultFormat) => {
     try {
-      await navigator.clipboard.writeText(`background: ${cssGradient};`);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 2000);
+      const text = formatGradient(gradient, format);
+      await navigator.clipboard.writeText(text);
+      setShowToast({ show: true, format });
+      onCopy(gradient);
+      setTimeout(() => setShowToast({ show: false, format: "" }), 2000);
+      setShowMenu(false);
     } catch (err) {
       console.error("Failed to copy!", err);
     }
@@ -57,7 +63,7 @@ export default function Blob({ gradient, index }: BlobProps) {
       <div className="relative w-48 h-48 sm:w-56 sm:h-56 mb-6">
         {/* The Liquid Blob */}
         <motion.div
-          onClick={handleCopy}
+          onClick={() => handleCopy()}
           className="absolute inset-0 cursor-pointer shadow-lg hover:shadow-xl transition-shadow animate-blob-bg"
           style={{
             background: cssGradient,
@@ -76,17 +82,54 @@ export default function Blob({ gradient, index }: BlobProps) {
 
         {/* Pop Toast Notification */}
         <AnimatePresence>
-          {showToast && (
+          {showToast.show && (
             <motion.div
               initial={{ opacity: 0, y: 10, scale: 0.8 }}
               animate={{ opacity: 1, y: -20, scale: 1 }}
               exit={{ opacity: 0, y: 0, scale: 0.8 }}
               className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[var(--foreground)] text-white px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap shadow-xl z-10"
             >
-              ✨ コピーしたよ！
+              ✨ {showToast.format.toUpperCase()}形式でコピーしたよ！
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Format Selector Menu */}
+        <div className="absolute -bottom-3 right-0 z-20">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowMenu(!showMenu);
+            }}
+            className="bg-white/90 hover:bg-white p-2 rounded-full shadow-lg border border-gray-100 text-[var(--foreground)] transition-all active:scale-90"
+          >
+            <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${showMenu ? 'rotate-180' : ''}`} />
+          </button>
+
+          <AnimatePresence>
+            {showMenu && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                className="absolute bottom-full right-0 mb-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden w-32 py-1"
+              >
+                {(['css-full', 'css-value', 'hex', 'json', 'tailwind'] as CopyFormat[]).map((f) => (
+                  <button
+                    key={f}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCopy(f);
+                    }}
+                    className="w-full text-left px-4 py-2 text-xs font-bold hover:bg-gray-50 transition-colors border-b last:border-0 border-gray-50"
+                  >
+                    {f.toUpperCase()}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Cute Japanese Name */}
