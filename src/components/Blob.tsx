@@ -62,9 +62,10 @@ export default function Blob({ gradient, index, defaultFormat, onCopy }: BlobPro
     >
       <div className="relative w-48 h-48 sm:w-56 sm:h-56 mb-6">
         {/* The Liquid Blob */}
-        <motion.div
+        <motion.button
+          aria-label={`グラデーション ${gradient.name} をコピーする`}
           onClick={() => handleCopy()}
-          className="absolute inset-0 cursor-pointer shadow-lg hover:shadow-xl transition-shadow animate-blob-bg"
+          className="absolute inset-0 cursor-pointer shadow-lg hover:shadow-xl transition-shadow animate-blob-bg focus-visible:ring-4 focus-visible:ring-[var(--primary)] focus-visible:outline-none"
           style={{
             background: cssGradient,
             borderRadius,
@@ -75,10 +76,10 @@ export default function Blob({ gradient, index, defaultFormat, onCopy }: BlobPro
           {/* Hover overlay for copy action */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 backdrop-blur-sm" style={{ borderRadius }}>
             <div className="bg-white/80 p-3 rounded-full text-[var(--foreground)] shadow-sm">
-              <Copy className="w-6 h-6" />
+              <Copy aria-hidden="true" className="w-6 h-6" />
             </div>
           </div>
-        </motion.div>
+        </motion.button>
 
         {/* Pop Toast Notification */}
         <AnimatePresence>
@@ -97,13 +98,15 @@ export default function Blob({ gradient, index, defaultFormat, onCopy }: BlobPro
         {/* Format Selector Menu */}
         <div className="absolute -bottom-3 right-0 z-20">
           <button
+            aria-label="コピー形式を選択する"
+            aria-expanded={showMenu}
             onClick={(e) => {
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
             className="bg-white/90 hover:bg-white p-2 rounded-full shadow-lg border border-gray-100 text-[var(--foreground)] transition-all active:scale-90"
           >
-            <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${showMenu ? 'rotate-180' : ''}`} />
+            <ChevronDown aria-hidden="true" className={`w-4 h-4 transition-transform duration-300 ${showMenu ? 'rotate-180' : ''}`} />
           </button>
 
           <AnimatePresence>
