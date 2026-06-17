@@ -86,6 +86,7 @@ function generateCuteName(h: number, s: number, l: number): string {
 }
 
 export function generatePalettes(baseHex: string): CategoryData[] {
+  const normalizedBase = hslToHex(hexToHSL(baseHex));
   const baseHSL = hexToHSL(baseHex);
 
   // Vivid (鮮やかポップ): Keep saturation high (>60%). Shift Hue slightly.
@@ -98,8 +99,11 @@ export function generatePalettes(baseHex: string): CategoryData[] {
 
     return {
       id: `vivid-${i}`,
-      colors: [hslToHex({ h: h1, s, l: l1 }), hslToHex({ h: h2, s, l: l2 })],
-      name: generateCuteName(h1, s, (l1 + l2) / 2)
+      colors: [
+        i === 0 ? normalizedBase : hslToHex({ h: h1, s, l: l1 }),
+        hslToHex({ h: h2, s, l: l2 })
+      ],
+      name: generateCuteName(h1)
     };
   });
 
