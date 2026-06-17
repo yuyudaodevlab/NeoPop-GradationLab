@@ -103,7 +103,7 @@ export function generatePalettes(baseHex: string): CategoryData[] {
         i === 0 ? normalizedBase : hslToHex({ h: h1, s, l: l1 }),
         hslToHex({ h: h2, s, l: l2 })
       ],
-      name: generateCuteName(h1)
+      name: generateCuteName(h1, s, (l1 + l2) / 2)
     };
   });
 
