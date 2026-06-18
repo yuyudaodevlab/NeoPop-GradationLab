@@ -107,17 +107,20 @@ export function generatePalettes(baseHex: string): CategoryData[] {
     };
   });
 
-  // Vivid Cool (鮮やかクール): Force Hue into cool spectrum (160 - 260). Keep sat high.
+  // Vivid Cool (鮮やかクール): Relative to base hue, but with cooler shift. Keep sat high.
   const vividCoolGradients: GradientData[] = Array.from({ length: 3 }).map((_, i) => {
-    const h1 = 160 + (Math.random() * 100); // 160-260
-    const h2 = (h1 + 30 + Math.random() * 40) % 360; // Keep within cool ideally, but let it shift
+    const h1 = (baseHSL.h + (i * 10)) % 360;
+    const h2 = (h1 + 40 + Math.random() * 20) % 360;
     const s = Math.max(70, baseHSL.s);
     const l1 = Math.max(30, Math.min(80, baseHSL.l - 15));
     const l2 = Math.max(40, Math.min(90, baseHSL.l - 5));
 
     return {
       id: `cool-${i}`,
-      colors: [hslToHex({ h: h1, s, l: l1 }), hslToHex({ h: h2, s, l: l2 })],
+      colors: [
+        i === 0 ? normalizedBase : hslToHex({ h: h1, s, l: l1 }),
+        hslToHex({ h: h2, s, l: l2 })
+      ],
       name: generateCuteName(h1, s, (l1 + l2) / 2)
     };
   });
@@ -133,7 +136,10 @@ export function generatePalettes(baseHex: string): CategoryData[] {
 
     return {
       id: `earth-${i}`,
-      colors: [hslToHex({ h: h1, s: s1, l: l1 }), hslToHex({ h: h2, s: s2, l: l2 })],
+      colors: [
+        i === 0 ? normalizedBase : hslToHex({ h: h1, s: s1, l: l1 }),
+        hslToHex({ h: h2, s: s2, l: l2 })
+      ],
       name: generateCuteName(h1, (s1 + s2) / 2, (l1 + l2) / 2)
     };
   });
