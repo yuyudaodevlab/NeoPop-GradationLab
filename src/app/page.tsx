@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Palette, Wand2, ClipboardCheck, History, Check } from "lucide-react";
 import { generatePalettes, getRandomHex, CategoryData, CopyFormat, GradientData, formatGradient } from "@/lib/colors";
 import Blob from "@/components/Blob";
+import ModernBackdrop from "@/components/ModernBackdrop";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -74,7 +75,9 @@ export default function Home() {
   }, [handleRandomize]);
 
   return (
-    <main className="min-h-screen py-12 px-6 max-w-5xl mx-auto flex flex-col items-center">
+    <main className="relative min-h-screen py-12 px-6 max-w-5xl mx-auto flex flex-col items-center overflow-hidden">
+      <ModernBackdrop />
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,#ffffff88_0%,#fdf5fecc_45%,#f8f1ff_100%)] backdrop-blur-[1px]" />
       <header className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold font-display text-[var(--primary)] mb-4 drop-shadow-sm">
           NeoPop-Gradation Lab
@@ -84,7 +87,7 @@ export default function Home() {
         </p>
       </header>
 
-      <section className="flex flex-col sm:flex-row gap-4 items-center mb-16 bg-white p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[var(--primary)]/10">
+      <section className="flex flex-col sm:flex-row gap-4 items-center mb-16 bg-white/75 backdrop-blur-md p-6 rounded-[2rem] shadow-[0_16px_45px_rgb(34,30,65,0.12)] border border-white/60">
         <div className="flex items-center gap-3 relative">
           <Palette className="text-[var(--primary)] w-6 h-6" />
           <span className="font-bold whitespace-nowrap">🎨 色を選ぶ</span>
@@ -122,7 +125,7 @@ export default function Home() {
       </section>
 
       {/* Clipboard Settings */}
-      <section className="mb-12 flex flex-wrap items-center justify-center gap-4 bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-gray-100 shadow-sm">
+      <section className="mb-12 flex flex-wrap items-center justify-center gap-4 bg-white/65 backdrop-blur-md p-4 rounded-2xl border border-white/60 shadow-[0_10px_30px_rgb(34,30,65,0.08)]">
         <div className="flex items-center gap-2 text-sm font-bold text-[var(--foreground)]/70">
           <ClipboardCheck className="w-4 h-4 text-[var(--primary)]" />
           <span>コピー形式の既定値:</span>
